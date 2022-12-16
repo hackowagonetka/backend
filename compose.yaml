@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+    go-back:
+        build:
+            context: .
+            dockerfile: ./cmd/app/Dockerfile
+    db:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_USER: $DATABASE_USER
+            POSTGRES_PASSWORD: $DATABASE_PASSWORD
+            POSTGRES_DB: $DATABASE_NAME
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080
