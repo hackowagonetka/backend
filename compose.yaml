@@ -6,7 +6,7 @@ services:
             context: .
             dockerfile: ./cmd/app/Dockerfile
         ports:
-            - 80:80
+            - 8081:80
             
     db:
         image: postgres

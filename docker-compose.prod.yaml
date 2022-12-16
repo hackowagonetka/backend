@@ -3,4 +3,4 @@ version: "3"
 services:
     go-back:
         ports:
-            - 80:80
+            - 8081:80
