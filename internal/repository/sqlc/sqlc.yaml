@@ -1,7 +1,15 @@
 version: "2"
 sql:
     - engine: "postgresql"
-      queries: "query.sql"
+      queries: "users_query.sql"
+      schema: "schema.sql"
+      gen:
+          go:
+              package: "db_queries"
+              out: "db_queries"
+
+    - engine: "postgresql"
+      queries: "points_query.sql"
       schema: "schema.sql"
       gen:
           go:

@@ -3,8 +3,12 @@ module backend-hagowagonetka
 go 1.19
 
 require (
+	github.com/go-chi/chi/v5 v5.0.8
+	github.com/goccy/go-json v0.10.0
 	github.com/lib/pq v1.10.7
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 )
 
 require (

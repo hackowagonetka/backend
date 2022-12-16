@@ -13,3 +13,9 @@ type Point struct {
 	Lat sql.NullString
 	Lon sql.NullString
 }
+
+type User struct {
+	ID       int64
+	Login    string
+	Password string
+}
