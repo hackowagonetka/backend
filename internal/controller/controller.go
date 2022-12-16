@@ -14,6 +14,7 @@ func NewHTTPController(
 	router *chi.Mux,
 	Services *services.Services,
 ) *HTTPController {
+
 	api := chi.NewRouter()
 	router.Mount("/api/v1", api)
 
