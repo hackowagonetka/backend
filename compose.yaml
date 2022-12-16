@@ -5,6 +5,8 @@ services:
         build:
             context: .
             dockerfile: ./cmd/app/Dockerfile
+        ports:
+            - 80:80
     db:
         image: postgres
         restart: always
@@ -12,9 +14,30 @@ services:
             POSTGRES_USER: $DATABASE_USER
             POSTGRES_PASSWORD: $DATABASE_PASSWORD
             POSTGRES_DB: $DATABASE_NAME
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $DATABASE_USER -d $DATABASE_NAME"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
 
     adminer:
         image: adminer
         restart: always
         ports:
             - 8080:8080
+
+    migrate:
+        image: migrate/migrate
+        volumes:
+            - ./internal/repository/migration:/migration
+        command:
+            [
+                "-path",
+                "/migration",
+                "-database",
+                "postgres://$DATABASE_USER:$DATABASE_PASSWORD@$DATABASE_HOST:$DATABASE_PORT/$DATABASE_NAME?sslmode=disable",
+                "up",
+            ]
+        depends_on:
+            db:
+                condition: service_healthy
