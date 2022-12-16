@@ -7,9 +7,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func init() {
+	config.Load(".")
+}
+
 func main() {
 	logrus.Info("app is run!")
-
-	config.Load(".")
 	app.Launch()
 }

@@ -23,3 +23,25 @@ func (s *Services) AuthSignUp(ctx context.Context, di AuthSignUpDI) (int64, erro
 		Password: string(hash),
 	})
 }
+
+type AuthSignInDI struct {
+	Login    string
+	Password string
+}
+
+func (s *Services) AuthSignIn(ctx context.Context, di AuthSignInDI) (string, error) {
+	user, err := s.Repository.UserGet(ctx, di.Login)
+	if err != nil {
+		return "", err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(di.Password)); err != nil {
+		return "", err
+	}
+
+	_, token, err := s.jwtAuth.Encode(map[string]interface{}{
+		"user_id": user.ID,
+	})
+
+	return token, err
+}
