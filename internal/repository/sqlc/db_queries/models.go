@@ -5,13 +5,16 @@
 package db_queries
 
 import (
-	"database/sql"
+	"time"
+
+	"backend-hagowagonetka/internal/repository/dto"
 )
 
-type Point struct {
-	ID  int64
-	Lat sql.NullString
-	Lon sql.NullString
+type RoutesHistory struct {
+	ID        int64
+	CreatedAt time.Time
+	Data      *dto.RoutesHistoryData
+	RefUserID int32
 }
 
 type User struct {

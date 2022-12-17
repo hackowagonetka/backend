@@ -4,8 +4,9 @@ CREATE TABLE users (
     password varchar NOT NULL
 );
 
-CREATE TABLE points ( 
+CREATE TABLE routes_history ( 
     id BIGSERIAL PRIMARY KEY,
-    lat decimal, 
-    lon decimal
+    created_at TIMESTAMP NOT NULL,
+    data jsonb,
+    ref_user_id integer REFERENCES users NOT NULL
 );

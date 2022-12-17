@@ -39,7 +39,7 @@ func (s *Services) AuthSignIn(ctx context.Context, di AuthSignInDI) (string, err
 		return "", err
 	}
 
-	_, token, err := s.jwtAuth.Encode(map[string]interface{}{
+	_, token, err := s.AuthJWT.Encode(map[string]interface{}{
 		"user_id": user.ID,
 	})
 

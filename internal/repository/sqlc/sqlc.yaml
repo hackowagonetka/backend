@@ -9,9 +9,15 @@ sql:
               out: "db_queries"
 
     - engine: "postgresql"
-      queries: "points_query.sql"
+      queries: "routes_history_query.sql"
       schema: "schema.sql"
       gen:
           go:
               package: "db_queries"
               out: "db_queries"
+              overrides:
+                  - db_type: "geometry"
+                    go_type: "github.com/cridenour/go-postgis.Point"
+                  
+                  - column: "routes_history.data"
+                    go_type: "*backend-hagowagonetka/internal/repository/dto.RoutesHistoryData"
