@@ -10,5 +10,5 @@ type GeocoderOutput struct {
 }
 
 type Geocoder interface {
-	Request(i GeocoderInput) (*GeocoderOutput, error)
+	Request(i GeocoderInput) (GeocoderOutput, error)
 }

@@ -34,12 +34,12 @@ type GeocoderYandexResponse struct {
 	} `json:"response"`
 }
 
-func (g *YandexGeocoder) Request(i GeocoderInput) (*GeocoderOutput, error) {
+func (g *YandexGeocoder) Request(i GeocoderInput) (GeocoderOutput, error) {
 	url := "https://geocode-maps.yandex.ru/1.x/"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return GeocoderOutput{}, err
 	}
 
 	q := req.URL.Query()
@@ -50,31 +50,31 @@ func (g *YandexGeocoder) Request(i GeocoderInput) (*GeocoderOutput, error) {
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return GeocoderOutput{}, err
 	}
 	defer res.Body.Close()
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return GeocoderOutput{}, err
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("geocoder: YandexGeocoder: %s", string(b))
+		return GeocoderOutput{}, fmt.Errorf("geocoder: YandexGeocoder: %s", string(b))
 	}
 
 	var body GeocoderYandexResponse
 	if err := json.Unmarshal(b, &body); err != nil {
-		return nil, fmt.Errorf("geocoder: YandexGeocoder: %w", err)
+		return GeocoderOutput{}, fmt.Errorf("geocoder: YandexGeocoder: %w", err)
 	}
 
 	if len(body.Response.GeoObjectCollection.FeatureMember) == 0 {
-		return nil, fmt.Errorf("geocoder: YandexGeocoder: %s", string(b))
+		return GeocoderOutput{}, fmt.Errorf("geocoder: YandexGeocoder: %s", string(b))
 	}
 
 	output := GeocoderOutput{
 		Name: body.Response.GeoObjectCollection.FeatureMember[0].GeoObject.MetaDataProperty.GeocoderMetaData.Text,
 	}
 
-	return &output, nil
+	return output, nil
 }
