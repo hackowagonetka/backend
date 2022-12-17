@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type RoutesAnalysisBosy struct {
+type RoutesAnalysisBody struct {
 	Date time.Time `json:"time"`
 
 	Cargo struct {
@@ -33,7 +33,7 @@ type RoutesAnalysisResponse struct {
 }
 
 func (c *HTTPController) RoutesAnalysis(w http.ResponseWriter, r *http.Request) {
-	var body RoutesAnalysisBosy
+	var body RoutesAnalysisBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		render.NewReponse(http.StatusBadRequest, w, err)
 		return
