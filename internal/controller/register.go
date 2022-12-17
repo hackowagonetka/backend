@@ -15,5 +15,6 @@ func (c *HTTPController) register(router *chi.Mux) {
 
 	router.Route("/routes", func(r chi.Router) {
 		r.Post("/", c.RoutesAnalysis)
+		r.With(jwtauth.Authenticator).Get("/", c.RoutesHistoryGet)
 	})
 }

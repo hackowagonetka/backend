@@ -7,6 +7,6 @@ CREATE TABLE users (
 CREATE TABLE routes_history ( 
     id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
-    data jsonb,
+    data jsonb NOT NULL,
     ref_user_id integer REFERENCES users NOT NULL
 );

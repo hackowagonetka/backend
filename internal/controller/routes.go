@@ -14,7 +14,7 @@ import (
 )
 
 type RoutesAnalysisBody struct {
-	Date time.Time `json:"time"`
+	Date time.Time `json:"date"`
 
 	Cargo struct {
 		Total  uint `json:"total"`
@@ -22,7 +22,7 @@ type RoutesAnalysisBody struct {
 	} `json:"cargo"`
 
 	Points []struct {
-		Lon float64 `json:"lon"` // y
+		Lon float64 `json:"lng"` // y
 		Lat float64 `json:"lat"` // x
 	} `json:"points"`
 }
@@ -40,10 +40,10 @@ func (c *HTTPController) RoutesAnalysis(w http.ResponseWriter, r *http.Request) 
 	}
 
 	_, claims, err := jwtauth.FromContext(r.Context())
-	if err != nil {
-		user_id := claims["user_id"].(int64)
-		points := make([]postgis.Point, 0, len(body.Points))
+	if err == nil {
+		user_id := int64(claims["user_id"].(float64))
 
+		points := make([]postgis.Point, 0, len(body.Points))
 		for _, point := range body.Points {
 			points = append(points, postgis.Point{
 				X: point.Lat,
@@ -70,4 +70,62 @@ func (c *HTTPController) RoutesAnalysis(w http.ResponseWriter, r *http.Request) 
 	}
 
 	render.NewReponse(http.StatusOK, w, RoutesAnalysisResponse(analys))
+}
+
+type RoutesHistoryGetPoints struct {
+	ID  int     `json:"id"`
+	Lon float64 `json:"lng"`
+	Lat float64 `json:"lat"`
+}
+
+type RoutesHistoryGetData struct {
+	ID        int64                    `json:"id"`
+	CreatedAt time.Time                `json:"created_at"`
+	Points    []RoutesHistoryGetPoints `json:"points"`
+}
+
+type RoutesHistoryGetResponse []RoutesHistoryGetData
+
+func (c *HTTPController) RoutesHistoryGet(w http.ResponseWriter, r *http.Request) {
+	_, claims, err := jwtauth.FromContext(r.Context())
+	if err != nil {
+		render.NewReponse(http.StatusBadRequest, w, err)
+		return
+	}
+
+	user_id := int64(claims["user_id"].(float64))
+
+	histories, err := c.Services.RoutesHistoryGet(r.Context(), user_id)
+	if err != nil {
+		logrus.Error(fmt.Errorf("controller: RoutesHistoryGet: %w", err))
+		render.NewReponse(http.StatusInternalServerError, w, nil)
+		return
+	}
+
+	var response RoutesHistoryGetResponse = make(RoutesHistoryGetResponse, 0, len(histories))
+	for _, history := range histories {
+		gisPoints, err := c.Services.RoutesUnmarshalPoints(history.Data)
+		if err != nil {
+			logrus.Error(fmt.Errorf("controller: RoutesHistoryGet: %w", err))
+			render.NewReponse(http.StatusInternalServerError, w, nil)
+			return
+		}
+
+		points := make([]RoutesHistoryGetPoints, 0, len(gisPoints))
+		for index, point := range gisPoints {
+			points = append(points, RoutesHistoryGetPoints{
+				ID:  index + 1,
+				Lon: point.Y,
+				Lat: point.X,
+			})
+		}
+
+		response = append(response, RoutesHistoryGetData{
+			ID:        history.ID,
+			CreatedAt: history.CreatedAt,
+			Points:    points,
+		})
+	}
+
+	render.NewReponse(http.StatusOK, w, response)
 }

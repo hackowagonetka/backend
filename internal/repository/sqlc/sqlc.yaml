@@ -19,5 +19,5 @@ sql:
                   - db_type: "geometry"
                     go_type: "github.com/cridenour/go-postgis.Point"
                   
-                  - column: "routes_history.data"
-                    go_type: "*backend-hagowagonetka/internal/repository/dto.RoutesHistoryData"
+                  # - column: "routes_history.data"
+                  #   go_type: "backend-hagowagonetka/internal/repository/dto.RoutesHistoryData"

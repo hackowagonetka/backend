@@ -1,13 +1,23 @@
 package services
 
 import (
-	"backend-hagowagonetka/internal/repository/dto"
 	"backend-hagowagonetka/internal/repository/sqlc/db_queries"
 	"context"
 	"time"
 
 	"github.com/cridenour/go-postgis"
+	"github.com/goccy/go-json"
 )
+
+func (s *Services) RoutesMarshalPoints(points []postgis.Point) ([]byte, error) {
+	return json.Marshal(points)
+}
+
+func (s *Services) RoutesUnmarshalPoints(raw json.RawMessage) ([]postgis.Point, error) {
+	var points []postgis.Point
+	err := json.Unmarshal(raw, &points)
+	return points, err
+}
 
 type RoutesHistoryCreateDI struct {
 	UserID int32
@@ -15,13 +25,20 @@ type RoutesHistoryCreateDI struct {
 }
 
 func (s *Services) RoutesHistoryCreate(ctx context.Context, di RoutesHistoryCreateDI) (int64, error) {
+	data, err := s.RoutesMarshalPoints(di.Points)
+	if err != nil {
+		return 0, err
+	}
+
 	return s.Repository.RoutesHistoryCreate(ctx, db_queries.RoutesHistoryCreateParams{
 		CreatedAt: time.Now().UTC(),
-		Data: &dto.RoutesHistoryData{
-			Points: di.Points,
-		},
+		Data:      data,
 		RefUserID: di.UserID,
 	})
+}
+
+func (s *Services) RoutesHistoryGet(ctx context.Context, userID int64) ([]db_queries.RoutesHistory, error) {
+	return s.Repository.RoutesHistoryGet(ctx, int32(userID))
 }
 
 type RoutesAnalysisDI struct {

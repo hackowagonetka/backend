@@ -27,5 +27,3 @@ func NewServices(
 		Repository: Repository,
 	}
 }
-
-// SELECT  CAST( ST_DistanceSphere( ST_MakePoint(50.999759,81.460766),ST_MakePoint(51.527623,81.217673) ) AS numeric );

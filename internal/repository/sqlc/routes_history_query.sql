@@ -3,7 +3,7 @@ INSERT INTO routes_history ( created_at, data, ref_user_id ) VALUES ( $1, $2, $3
 -- name: RoutesHistoryGet :many
 SELECT  *
 FROM routes_history
-WHERE ref_user_id = ?
+WHERE ref_user_id = $1
 ORDER BY id DESC
 LIMIT 10;
 -- name: RoutesDistance :one

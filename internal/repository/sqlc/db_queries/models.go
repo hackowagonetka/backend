@@ -5,15 +5,14 @@
 package db_queries
 
 import (
+	"encoding/json"
 	"time"
-
-	"backend-hagowagonetka/internal/repository/dto"
 )
 
 type RoutesHistory struct {
 	ID        int64
 	CreatedAt time.Time
-	Data      *dto.RoutesHistoryData
+	Data      json.RawMessage
 	RefUserID int32
 }
 

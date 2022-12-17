@@ -7,9 +7,8 @@ package db_queries
 
 import (
 	"context"
+	"encoding/json"
 	"time"
-
-	"backend-hagowagonetka/internal/repository/dto"
 )
 
 const routesDistance = `-- name: RoutesDistance :one
@@ -41,7 +40,7 @@ INSERT INTO routes_history ( created_at, data, ref_user_id ) VALUES ( $1, $2, $3
 
 type RoutesHistoryCreateParams struct {
 	CreatedAt time.Time
-	Data      *dto.RoutesHistoryData
+	Data      json.RawMessage
 	RefUserID int32
 }
 
@@ -55,7 +54,7 @@ func (q *Queries) RoutesHistoryCreate(ctx context.Context, arg RoutesHistoryCrea
 const routesHistoryGet = `-- name: RoutesHistoryGet :many
 SELECT  id, created_at, data, ref_user_id
 FROM routes_history
-WHERE ref_user_id = ?
+WHERE ref_user_id = $1
 ORDER BY id DESC
 LIMIT 10
 `
