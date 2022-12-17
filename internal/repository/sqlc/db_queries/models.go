@@ -5,15 +5,17 @@
 package db_queries
 
 import (
-	"encoding/json"
 	"time"
 )
 
-type RoutesHistory struct {
+type Station struct {
 	ID        int64
 	CreatedAt time.Time
-	Data      json.RawMessage
-	RefUserID int32
+	Name      string
+	Geoname   string
+	Lon       float64
+	Lat       float64
+	RefUserID int64
 }
 
 type User struct {

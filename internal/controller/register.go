@@ -13,8 +13,14 @@ func (c *HTTPController) register(router *chi.Mux) {
 		r.Post("/sign-in", c.AuthSignIn)
 	})
 
+	router.Route("/stations", func(r chi.Router) {
+		r.Use(jwtauth.Authenticator)
+
+		r.Post("/", c.StationCreate)
+		r.Get("/", c.StationGetList)
+	})
+
 	router.Route("/routes", func(r chi.Router) {
-		r.Post("/", c.RoutesAnalysis)
-		r.With(jwtauth.Authenticator).Get("/", c.RoutesHistoryGet)
+		r.Post("/", c.RouteAnalysis)
 	})
 }

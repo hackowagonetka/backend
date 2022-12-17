@@ -22,7 +22,7 @@ func TestServices_RoutesDistance(t *testing.T) {
 		}),
 	)
 
-	meters, err := services.RoutesDistance(
+	meters, err := services.RouteDistance(
 		context.Background(),
 		RoutesDistancePoint{
 			Lon: 81.460766,

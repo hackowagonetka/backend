@@ -22,9 +22,9 @@ type Repository struct {
 }
 
 func NewRepository(src Source) *Repository {
-	srcLink := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", src.User, src.Password, src.Host, src.Port, src.DatabaseName)
+	link := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", src.User, src.Password, src.Host, src.Port, src.DatabaseName)
 
-	db, err := sql.Open("postgres", srcLink)
+	db, err := sql.Open("postgres", link)
 	if err != nil {
 		panic(err)
 	}

@@ -4,9 +4,12 @@ CREATE TABLE users (
     password varchar NOT NULL
 );
 
-CREATE TABLE routes_history ( 
+CREATE TABLE stations (
     id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
-    data jsonb NOT NULL,
-    ref_user_id integer REFERENCES users NOT NULL
+    name varchar NOT NULL,
+    geoname varchar NOT NULL,
+    lon float NOT NULL,
+    lat float NOT NULL,
+    ref_user_id bigint REFERENCES users NOT NULL
 );
