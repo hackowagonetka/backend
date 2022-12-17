@@ -5,6 +5,7 @@ import (
 	"backend-hagowagonetka/internal/controller"
 	"backend-hagowagonetka/internal/repository"
 	"backend-hagowagonetka/internal/services"
+	"backend-hagowagonetka/pkg/geocoder"
 	"net/http"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -30,6 +31,8 @@ func Launch() {
 		}))
 	}
 
+	geocoder := geocoder.NewYandexGeocoder(cfg.Env.YandexGeocoderToken)
+
 	repo := repository.NewRepository(repository.Source{
 		User:         cfg.Env.DatabaseUser,
 		Password:     cfg.Env.DatabasePassword,
@@ -38,7 +41,7 @@ func Launch() {
 		DatabaseName: cfg.Env.DatabaseName,
 	})
 
-	services := services.NewServices(repo)
+	services := services.NewServices(geocoder, repo)
 
 	// register api
 	controller.NewHTTPController(router, services)

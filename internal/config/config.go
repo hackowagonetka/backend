@@ -4,7 +4,8 @@ import "github.com/spf13/viper"
 
 type Config struct {
 	Env struct {
-		TokenSecretKey string `mapstructure:"TOKEN_SECRET_KEY"`
+		TokenSecretKey      string `mapstructure:"TOKEN_SECRET_KEY"`
+		YandexGeocoderToken string `mapstructure:"YANDEX_GEOCODER_TOKEN"`
 
 		DatabaseUser     string `mapstructure:"DATABASE_USER"`
 		DatabasePassword string `mapstructure:"DATABASE_PASSWORD"`

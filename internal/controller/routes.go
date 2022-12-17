@@ -2,25 +2,24 @@ package controller
 
 import (
 	"backend-hagowagonetka/internal/controller/render"
+	repository_dto "backend-hagowagonetka/internal/repository/dto"
 	"backend-hagowagonetka/internal/services"
+	"backend-hagowagonetka/pkg/geocoder"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/cridenour/go-postgis"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/goccy/go-json"
 	"github.com/sirupsen/logrus"
 )
 
 type RoutesAnalysisBody struct {
-	Date time.Time `json:"date"`
-
+	Date  time.Time `json:"date"`
 	Cargo struct {
 		Total  uint `json:"total"`
 		Filled uint `json:"filled"`
 	} `json:"cargo"`
-
 	Points []struct {
 		Lon float64 `json:"lng"` // y
 		Lat float64 `json:"lat"` // x
@@ -43,11 +42,19 @@ func (c *HTTPController) RoutesAnalysis(w http.ResponseWriter, r *http.Request) 
 	if err == nil {
 		user_id := int64(claims["user_id"].(float64))
 
-		points := make([]postgis.Point, 0, len(body.Points))
-		for _, point := range body.Points {
-			points = append(points, postgis.Point{
-				X: point.Lat,
-				Y: point.Lon,
+		points := make(repository_dto.RoutesHistoryData, 0, len(body.Points))
+		for index, point := range body.Points {
+			geodata, err := c.Services.Geocoder.Request(geocoder.GeocoderInput(point))
+			if err != nil {
+				logrus.Error(fmt.Errorf("controller: RoutesAnalysis: %w", err))
+				render.NewReponse(http.StatusInternalServerError, w, nil)
+			}
+
+			points = append(points, repository_dto.RoutesHistoryPoint{
+				ID:   index + 1,
+				Name: geodata.Name,
+				Lon:  point.Lon,
+				Lat:  point.Lat,
 			})
 		}
 
@@ -72,16 +79,10 @@ func (c *HTTPController) RoutesAnalysis(w http.ResponseWriter, r *http.Request) 
 	render.NewReponse(http.StatusOK, w, RoutesAnalysisResponse(analys))
 }
 
-type RoutesHistoryGetPoints struct {
-	ID  int     `json:"id"`
-	Lon float64 `json:"lng"`
-	Lat float64 `json:"lat"`
-}
-
 type RoutesHistoryGetData struct {
-	ID        int64                    `json:"id"`
-	CreatedAt time.Time                `json:"created_at"`
-	Points    []RoutesHistoryGetPoints `json:"points"`
+	ID        int64                            `json:"id"`
+	CreatedAt time.Time                        `json:"created_at"`
+	Points    repository_dto.RoutesHistoryData `json:"points"`
 }
 
 type RoutesHistoryGetResponse []RoutesHistoryGetData
@@ -104,20 +105,11 @@ func (c *HTTPController) RoutesHistoryGet(w http.ResponseWriter, r *http.Request
 
 	var response RoutesHistoryGetResponse = make(RoutesHistoryGetResponse, 0, len(histories))
 	for _, history := range histories {
-		gisPoints, err := c.Services.RoutesUnmarshalPoints(history.Data)
+		points, err := c.Services.RoutesUnmarshalPoints(history.Data)
 		if err != nil {
 			logrus.Error(fmt.Errorf("controller: RoutesHistoryGet: %w", err))
 			render.NewReponse(http.StatusInternalServerError, w, nil)
 			return
-		}
-
-		points := make([]RoutesHistoryGetPoints, 0, len(gisPoints))
-		for index, point := range gisPoints {
-			points = append(points, RoutesHistoryGetPoints{
-				ID:  index + 1,
-				Lon: point.Y,
-				Lat: point.X,
-			})
 		}
 
 		response = append(response, RoutesHistoryGetData{
