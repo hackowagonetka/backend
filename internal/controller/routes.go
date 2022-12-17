@@ -4,7 +4,6 @@ import (
 	"backend-hagowagonetka/internal/controller/render"
 	repository_dto "backend-hagowagonetka/internal/repository/dto"
 	"backend-hagowagonetka/internal/services"
-	"backend-hagowagonetka/pkg/geocoder"
 	"fmt"
 	"net/http"
 	"time"
@@ -42,20 +41,9 @@ func (c *HTTPController) RoutesAnalysis(w http.ResponseWriter, r *http.Request) 
 	if err == nil {
 		user_id := int64(claims["user_id"].(float64))
 
-		points := make(repository_dto.RoutesHistoryData, 0, len(body.Points))
-		for index, point := range body.Points {
-			geodata, err := c.Services.Geocoder.Request(geocoder.GeocoderInput(point))
-			if err != nil {
-				logrus.Error(fmt.Errorf("controller: RoutesAnalysis: %w", err))
-				render.NewReponse(http.StatusInternalServerError, w, nil)
-			}
-
-			points = append(points, repository_dto.RoutesHistoryPoint{
-				ID:   index + 1,
-				Name: geodata.Name,
-				Lon:  point.Lon,
-				Lat:  point.Lat,
-			})
+		points := make([]services.RoutesHistoryCreatePointParam, 0, len(body.Points))
+		for _, point := range body.Points {
+			points = append(points, services.RoutesHistoryCreatePointParam(point))
 		}
 
 		// save history
@@ -105,7 +93,7 @@ func (c *HTTPController) RoutesHistoryGet(w http.ResponseWriter, r *http.Request
 
 	var response RoutesHistoryGetResponse = make(RoutesHistoryGetResponse, 0, len(histories))
 	for _, history := range histories {
-		points, err := c.Services.RoutesUnmarshalPoints(history.Data)
+		points, err := c.Services.RoutesHistoryDataUnmarshal(history.Data)
 		if err != nil {
 			logrus.Error(fmt.Errorf("controller: RoutesHistoryGet: %w", err))
 			render.NewReponse(http.StatusInternalServerError, w, nil)

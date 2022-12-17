@@ -3,29 +3,52 @@ package services
 import (
 	repository_dto "backend-hagowagonetka/internal/repository/dto"
 	"backend-hagowagonetka/internal/repository/sqlc/db_queries"
+	"backend-hagowagonetka/pkg/geocoder"
 	"context"
 	"time"
 
 	"github.com/goccy/go-json"
+	"github.com/sirupsen/logrus"
 )
 
-func (s *Services) RoutesMarshalPoints(points repository_dto.RoutesHistoryData) ([]byte, error) {
+func (s *Services) RoutesHistoryDataMarshal(points repository_dto.RoutesHistoryData) ([]byte, error) {
 	return json.Marshal(points)
 }
 
-func (s *Services) RoutesUnmarshalPoints(raw json.RawMessage) (repository_dto.RoutesHistoryData, error) {
+func (s *Services) RoutesHistoryDataUnmarshal(raw json.RawMessage) (repository_dto.RoutesHistoryData, error) {
 	var points repository_dto.RoutesHistoryData
 	err := json.Unmarshal(raw, &points)
 	return points, err
 }
 
+type RoutesHistoryCreatePointParam struct {
+	Lon float64
+	Lat float64
+}
+
 type RoutesHistoryCreateDI struct {
 	UserID int32
-	Points repository_dto.RoutesHistoryData
+	Points []RoutesHistoryCreatePointParam
 }
 
 func (s *Services) RoutesHistoryCreate(ctx context.Context, di RoutesHistoryCreateDI) (int64, error) {
-	data, err := s.RoutesMarshalPoints(di.Points)
+	points := make(repository_dto.RoutesHistoryData, 0, len(di.Points))
+	for index, point := range di.Points {
+		geodata, err := s.Geocoder.Request(geocoder.GeocoderInput(point))
+		if err != nil {
+			logrus.Error(err)
+			geodata.Name = "-"
+		}
+
+		points = append(points, repository_dto.RoutesHistoryPoint{
+			ID:   index + 1,
+			Name: geodata.Name,
+			Lon:  point.Lon,
+			Lat:  point.Lat,
+		})
+	}
+
+	data, err := s.RoutesHistoryDataMarshal(points)
 	if err != nil {
 		return 0, err
 	}
