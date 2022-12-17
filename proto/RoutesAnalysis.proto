@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package routes_analysis;
+
+
+message AnalyseRequest {
+    int64 distance = 1; // расстояния в километрах между точками
+    int64 timestamp = 2; // время отправления
+    int32 cargo_total = 3; // общее кол-во грузов
+    int32 cargo_filled = 4; // заполненное кол-во грузов
+}
+
+message AnalyseResponse {
+    int64 time_spent = 1; // затраченное время в минутах
+}
+
+service RoutesAnalysis {
+    rpc Analyse(AnalyseRequest) returns (AnalyseResponse);
+}
