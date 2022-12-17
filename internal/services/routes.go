@@ -6,6 +6,22 @@ import (
 	"time"
 )
 
+const MINUTES_PER_DAY = 1440
+
+type RoutesAnalysisTimeConvert struct {
+	Days    int
+	Hours   int
+	Minutes int
+}
+
+func (s *Services) RoutesTimeConvert(totalMinutes int64) RoutesAnalysisTimeConvert {
+	return RoutesAnalysisTimeConvert{
+		Days:    int(totalMinutes / MINUTES_PER_DAY),
+		Hours:   int((totalMinutes % MINUTES_PER_DAY) / 60),
+		Minutes: int((totalMinutes % MINUTES_PER_DAY) % 60),
+	}
+}
+
 type RoutesAnalysisDI struct {
 	Date  time.Time
 	Cargo struct {
@@ -16,8 +32,7 @@ type RoutesAnalysisDI struct {
 }
 
 type RoutesAnalysisDO struct {
-	Hours   uint8
-	Minutes uint8
+	TimeSpent int64 // in minutes
 }
 
 func (s *Services) RoutesAnalysis(ctx context.Context, di RoutesAnalysisDI) (RoutesAnalysisDO, error) {
@@ -29,7 +44,7 @@ type RoutesDistancePoint struct {
 	Lat float64
 }
 
-func (s *Services) RouteDistance(ctx context.Context, p1 RoutesDistancePoint, p2 RoutesDistancePoint) (meters float64, err error) {
+func (s *Services) RoutesDistance(ctx context.Context, p1 RoutesDistancePoint, p2 RoutesDistancePoint) (meters float64, err error) {
 	return s.Repository.RouteDistance(ctx, db_queries.RouteDistanceParams{
 		StMakepoint:   p1.Lon,
 		StMakepoint_2: p1.Lat,

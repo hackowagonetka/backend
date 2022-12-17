@@ -1,8 +1,6 @@
 package services
 
 import (
-	"backend-hagowagonetka/internal/repository"
-	"backend-hagowagonetka/pkg/geocoder"
 	"context"
 	"fmt"
 	"testing"
@@ -10,19 +8,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestServices_RoutesDistance(t *testing.T) {
-	services := NewServices(
-		geocoder.NewYandexGeocoder("220d4c84-d54d-4a96-af30-e00235c569e3"),
-		repository.NewRepository(repository.Source{
-			User:         "app",
-			Password:     "password",
-			Host:         "localhost",
-			Port:         5432,
-			DatabaseName: "hackowagonetka",
-		}),
-	)
+func TestServices_RoutesConverTime(t *testing.T) {
+	services := newServices(t)
+	tm := services.RoutesTimeConvert(1506)
 
-	meters, err := services.RouteDistance(
+	fmt.Println("days: ", tm.Days)
+	fmt.Println("hours: ", tm.Hours)
+	fmt.Println("minutes: ", tm.Minutes)
+}
+
+func TestServices_RoutesDistance(t *testing.T) {
+	services := newServices(t)
+
+	meters, err := services.RoutesDistance(
 		context.Background(),
 		RoutesDistancePoint{
 			Lon: 81.460766,

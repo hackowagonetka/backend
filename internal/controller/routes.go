@@ -21,8 +21,9 @@ type RoutesAnalysisBody struct {
 }
 
 type RoutesAnalysisResponse struct {
-	Hours   uint8 `json:"hours"`
-	Minutes uint8 `json:"minutes"`
+	Days    int `json:"days"`
+	Hours   int `json:"hours"`
+	Minutes int `json:"minutes"`
 }
 
 func (c *HTTPController) RouteAnalysis(w http.ResponseWriter, r *http.Request) {
@@ -39,5 +40,6 @@ func (c *HTTPController) RouteAnalysis(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.NewReponse(http.StatusOK, w, RoutesAnalysisResponse(analys))
+	t := c.Services.RoutesTimeConvert(analys.TimeSpent)
+	render.NewReponse(http.StatusOK, w, RoutesAnalysisResponse(t))
 }
