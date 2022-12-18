@@ -46,13 +46,13 @@ func Launch() {
 
 	//connect to gRPC Routes Analysis
 	gRPCRoutesAnalysisConn, err := grpc.Dial(
-		"localhost:7878",
+		"python-grpc:7878",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		panic(err)
 	}
-	defer gRPCRoutesAnalysisConn.Close()
+	// defer gRPCRoutesAnalysisConn.Close()
 	gRPCRoutesAnalysis := pb_routes_analysis.NewRoutesAnalysisClient(gRPCRoutesAnalysisConn)
 
 	services := services.NewServices(geocoder, repo, gRPCRoutesAnalysis)

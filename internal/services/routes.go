@@ -5,6 +5,7 @@ import (
 	pb_routes_analysis "backend-hagowagonetka/proto/golang/pb-routes-analysis"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -47,9 +48,14 @@ func (s *Services) RoutesAnalysis(ctx context.Context, di RoutesAnalysisDI) (Rou
 		return RoutesAnalysisDO{}, err
 	}
 
+	fmt.Println("STATIONS:", stations)
+
 	if len(stations) < 2 {
 		return RoutesAnalysisDO{}, ErrMinimumNumberOfStations
 	}
+
+	fmt.Println("POINT:", stations[0].Lon, stations[0].Lat)
+	fmt.Println("POINT:", stations[1].Lon, stations[1].Lat)
 
 	distanceM, err := s.RoutesDistance(ctx,
 		RoutesDistancePoint{
@@ -57,8 +63,8 @@ func (s *Services) RoutesAnalysis(ctx context.Context, di RoutesAnalysisDI) (Rou
 			Lat: stations[0].Lat,
 		},
 		RoutesDistancePoint{
-			Lon: stations[0].Lon,
-			Lat: stations[0].Lat,
+			Lon: stations[1].Lon,
+			Lat: stations[1].Lat,
 		},
 	)
 	if err != nil {
@@ -67,7 +73,16 @@ func (s *Services) RoutesAnalysis(ctx context.Context, di RoutesAnalysisDI) (Rou
 
 	distanceKM := distanceM / 1000
 
-	analyse, err := s.gRPCRoutesAnalysis.Analyse(ctx, &pb_routes_analysis.AnalyseRequest{
+	fmt.Println("DISTANCE:", distanceKM, distanceM)
+
+	fmt.Println("DATA %+w", &pb_routes_analysis.AnalyseRequest{
+		Distance:    int64(distanceKM),
+		Timestamp:   di.Date.Unix(),
+		CargoTotal:  int32(di.Cargo.Total),
+		CargoFilled: int32(di.Cargo.Filled),
+	})
+
+	analyse, err := s.gRPCRoutesAnalysis.Analyse(context.Background(), &pb_routes_analysis.AnalyseRequest{
 		Distance:    int64(distanceKM),
 		Timestamp:   di.Date.Unix(),
 		CargoTotal:  int32(di.Cargo.Total),
@@ -77,8 +92,11 @@ func (s *Services) RoutesAnalysis(ctx context.Context, di RoutesAnalysisDI) (Rou
 		return RoutesAnalysisDO{}, err
 	}
 
+	fmt.Println("ANALYSIS:", analyse.TimeSpent)
+	fmt.Println("ANALYSIS ERR: ", err)
+
 	return RoutesAnalysisDO{
-		TimeSpent: analyse.TimeSpent * 60,
+		TimeSpent: int64(analyse.TimeSpent) * 60,
 	}, nil
 }
 
