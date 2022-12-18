@@ -6,9 +6,12 @@ import (
 	"backend-hagowagonetka/internal/repository"
 	"backend-hagowagonetka/internal/services"
 	"backend-hagowagonetka/pkg/geocoder"
+	pb_routes_analysis "backend-hagowagonetka/proto/golang/pb-routes-analysis"
 	"net/http"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -41,7 +44,18 @@ func Launch() {
 		DatabaseName: cfg.Env.DatabaseName,
 	})
 
-	services := services.NewServices(geocoder, repo)
+	//connect to gRPC Routes Analysis
+	gRPCRoutesAnalysisConn, err := grpc.Dial(
+		"localhost:7878",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer gRPCRoutesAnalysisConn.Close()
+	gRPCRoutesAnalysis := pb_routes_analysis.NewRoutesAnalysisClient(gRPCRoutesAnalysisConn)
+
+	services := services.NewServices(geocoder, repo, gRPCRoutesAnalysis)
 
 	// register api
 	controller.NewHTTPController(router, services)

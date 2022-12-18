@@ -8,6 +8,8 @@ package db_queries
 import (
 	"context"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 const stationCreate = `-- name: StationCreate :one
@@ -47,6 +49,41 @@ SELECT id, created_at, name, geoname, lon, lat, ref_user_id FROM stations WHERE 
 
 func (q *Queries) StationGetList(ctx context.Context, refUserID int64) ([]Station, error) {
 	rows, err := q.db.QueryContext(ctx, stationGetList, refUserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Station
+	for rows.Next() {
+		var i Station
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.Name,
+			&i.Geoname,
+			&i.Lon,
+			&i.Lat,
+			&i.RefUserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const stationGetListByID = `-- name: StationGetListByID :many
+SELECT id, created_at, name, geoname, lon, lat, ref_user_id FROM stations WHERE id = ANY($1::bigint[])
+`
+
+func (q *Queries) StationGetListByID(ctx context.Context, dollar_1 []int64) ([]Station, error) {
+	rows, err := q.db.QueryContext(ctx, stationGetListByID, pq.Array(dollar_1))
 	if err != nil {
 		return nil, err
 	}

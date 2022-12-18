@@ -14,8 +14,8 @@ import (
 type RoutesAnalysisBody struct {
 	Date  time.Time `json:"date"`
 	Cargo struct {
-		Total  uint `json:"total"`
-		Filled uint `json:"filled"`
+		Total  int32 `json:"total"`
+		Filled int32 `json:"filled"`
 	} `json:"cargo"`
 	Stations []int64 `json:"stations"`
 }

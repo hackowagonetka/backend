@@ -1,7 +1,8 @@
 syntax = "proto3";
 
-package routes_analysis;
+option go_package = "proto/golang/pb-routes-analysis";
 
+package routes_analysis;
 
 message AnalyseRequest {
     int64 distance = 1; // расстояния в километрах между точками

@@ -7,3 +7,6 @@ INSERT INTO stations (
 
 -- name: StationGetList :many
 SELECT * FROM stations WHERE ref_user_id = $1;
+
+-- name: StationGetListByID :many
+SELECT * FROM stations WHERE id = ANY($1::bigint[]);

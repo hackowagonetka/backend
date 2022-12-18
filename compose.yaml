@@ -24,6 +24,7 @@ services:
             timeout: 10s
             retries: 10
 
+
     adminer:
         image: adminer
         restart: always
@@ -45,3 +46,6 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+
+
+
