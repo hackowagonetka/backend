@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  grpc:
+    build: .
+    ports:
+      - "7878:7878"
